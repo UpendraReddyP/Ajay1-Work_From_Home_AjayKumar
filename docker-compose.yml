@@ -1,0 +1,57 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16
+    container_name: postgres4
+    ports:
+      - "5077:5432"
+    environment:
+      POSTGRES_DB: new_employee_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: admin123
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - work-from-home-net
+
+  backend:
+    build: ./Backend
+    container_name: Backend4
+    ports:
+      - "3077:3077"
+    depends_on:
+      - postgres
+    env_file:
+      - ./Backend/server.env
+    networks:
+      - work-from-home-net
+
+  frontend:
+    build: ./Frontend
+    container_name: Frontend4
+    ports:
+      - "8143:80"
+    depends_on:
+      - backend
+    networks:
+      - work-from-home-net
+
+  hr_page:
+    build: ./HR_page
+    container_name: HR_page4
+    ports:
+      - "8144:80"
+    depends_on:
+      - backend
+    networks:
+      - work-from-home-net
+
+volumes:
+  pgdata:
+
+networks:
+  work-from-home-net:
+    driver: bridge
+
